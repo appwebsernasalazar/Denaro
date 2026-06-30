@@ -624,10 +624,11 @@ let resMonth = new Date().getMonth(); // 0-11
 let resWeek = 0; // índice de semana dentro del mes, 0 = todo el mes
 let prevScreen = 'home';
 const SCRIPT_URL_KEY = 'denaroScriptUrl';
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw5XBr09KY6kbBPGPpRmEK3PPne_KLaCQgoX8pKWCg9817bBazr2i1mIE5giLO7mL68/exec';
 const SESSION_KEY = 'denaroSession'; // {token, email}
 let authMode = 'login'; // 'login' | 'register'
 
-function getScriptUrl(){ return localStorage.getItem(SCRIPT_URL_KEY) || ''; }
+function getScriptUrl(){ return localStorage.getItem(SCRIPT_URL_KEY) || DEFAULT_SCRIPT_URL; }
 function setScriptUrl(url){ localStorage.setItem(SCRIPT_URL_KEY, url.trim()); }
 
 function getSession(){
