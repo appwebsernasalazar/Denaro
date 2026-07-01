@@ -61,6 +61,16 @@ button, input, select{font-family:inherit;}
   width:100%;border:2px solid var(--line);padding:13px;font-size:0.92rem;color:var(--black);
 }
 .auth-field input:focus{outline:none;border-color:var(--blue);}
+
+.pwd-wrap{position:relative;display:flex;}
+.pwd-wrap input{flex:1;padding-right:46px;}
+.pwd-eye{
+  position:absolute;right:0;top:0;bottom:0;
+  width:46px;border:none;background:transparent;
+  font-size:1.1rem;cursor:pointer;color:var(--gray);
+  display:flex;align-items:center;justify-content:center;
+}
+.pwd-eye:active{color:var(--blue);}
 .auth-btn{
   width:100%;border:none;background:var(--blue);color:var(--white);
   padding:15px;font-weight:900;font-size:0.95rem;cursor:pointer;margin-top:6px;
@@ -367,11 +377,17 @@ button, input, select{font-family:inherit;}
     </div>
     <div class="auth-field">
       <label>Contraseña</label>
-      <input type="password" id="authPassword" placeholder="••••••" autocomplete="current-password">
+      <div class="pwd-wrap">
+        <input type="password" id="authPassword" placeholder="••••••" autocomplete="current-password">
+        <button type="button" class="pwd-eye" onclick="togglePwd('authPassword', this)">👁</button>
+      </div>
     </div>
     <div class="auth-field" id="authPasswordConfirmField" style="display:none;">
       <label>Repite la contraseña</label>
-      <input type="password" id="authPasswordConfirm" placeholder="••••••" autocomplete="new-password">
+      <div class="pwd-wrap">
+        <input type="password" id="authPasswordConfirm" placeholder="••••••" autocomplete="new-password">
+        <button type="button" class="pwd-eye" onclick="togglePwd('authPasswordConfirm', this)">👁</button>
+      </div>
     </div>
 
     <button class="auth-btn" id="authSubmitBtn" onclick="submitAuth()">Entrar</button>
@@ -624,7 +640,7 @@ let resMonth = new Date().getMonth(); // 0-11
 let resWeek = 0; // índice de semana dentro del mes, 0 = todo el mes
 let prevScreen = 'home';
 const SCRIPT_URL_KEY = 'denaroScriptUrl';
-const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw5XBr09KY6kbBPGPpRmEK3PPne_KLaCQgoX8pKWCg9817bBazr2i1mIE5giLO7mL68/exec';
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxvciJlLXBf1pCkzdqoJEzVQfX4Rb4fu-FjeU0rbwUGUrbdyDl6DxKPPWHuOSr7w_9xYQ/exec';
 const SESSION_KEY = 'denaroSession'; // {token, email}
 let authMode = 'login'; // 'login' | 'register'
 
@@ -706,6 +722,13 @@ async function saveData(data, silent){
 }
 
 /* ============ AUTH (login / registro) ============ */
+function togglePwd(id, btn){
+  const input = document.getElementById(id);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.textContent = isHidden ? '🙈' : '👁';
+}
+
 function switchAuthTab(mode){
   authMode = mode;
   document.getElementById('tabLogin').classList.toggle('active', mode==='login');
