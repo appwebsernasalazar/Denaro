@@ -1107,8 +1107,12 @@ function renderHistory(){
   let lastDate=null;
   items.forEach(t=>{
     if(t.date!==lastDate){
-      const d = new Date(t.date+'T00:00:00');
-      const label = d.toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long'});
+      let label = 'Sin fecha';
+      if(t.date && String(t.date).match(/^\d{4}-\d{2}-\d{2}$/)){
+        const parts = String(t.date).split('-');
+        const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+        label = d.toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long'});
+      }
       html += `<div class="hist-day">${label}</div>`;
       lastDate = t.date;
     }
