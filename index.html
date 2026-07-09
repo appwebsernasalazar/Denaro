@@ -497,132 +497,105 @@ button,input,select{font-family:inherit;}
 /* ══════════════════════════════════════════
    CONSEJERO SCREEN
 ══════════════════════════════════════════ */
-#screen-consejero{display:none;flex-direction:column;height:100vh;overflow:hidden;}
-#screen-consejero.active{display:flex;}
+#screen-consejero{display:none;position:absolute!important;top:0;left:0;right:0;bottom:0;overflow:hidden;}
+#screen-consejero.active{display:block!important;}
 
-.consejero-header{
-  display:flex;align-items:center;gap:14px;
-  padding:16px 20px;
-  border-bottom:1px solid var(--border);
-  background:var(--bg);
-  flex-shrink:0;
-}
-.ch-avatar{
-  width:44px;height:44px;border-radius:50%;
-  background:linear-gradient(135deg,#1a2a1a,#2a1a2a);
-  border:2px solid var(--mint);
+/* Header */
+#denaro-header{position:absolute;top:0;left:0;right:0;height:56px;
+  display:flex;align-items:center;gap:12px;padding:0 16px;
+  background:var(--bg2);border-bottom:1px solid var(--border);z-index:3;}
+
+/* Barra de contexto */
+#denaro-ctx{position:absolute;top:56px;left:0;right:0;
+  background:var(--mint-dim);border-bottom:1px solid rgba(0,212,170,0.2);
+  padding:6px 16px;display:flex;align-items:center;gap:8px;z-index:3;}
+.dctx-label{font-size:0.62rem;font-weight:700;color:var(--mint);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;}
+.dctx-vals{font-size:0.7rem;color:rgba(0,212,170,0.7);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* Mensajes — scrollable */
+#denaro-msgs{position:absolute;top:88px;left:0;right:0;bottom:130px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;}
+
+/* Sin API key */
+#denaro-nokey{position:absolute;top:88px;left:0;right:0;bottom:0;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:24px;text-align:center;gap:14px;}
+.dnokey-title{font-size:1rem;font-weight:700;}
+.dnokey-desc{font-size:0.82rem;color:var(--ink2);line-height:1.6;}
+.dnokey-input{width:100%;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--r12);padding:12px 16px;font-size:0.9rem;color:var(--white);
+  font-family:inherit;}
+.dnokey-input:focus{outline:none;border-color:var(--mint);}
+.dnokey-btn{width:100%;background:linear-gradient(135deg,var(--mint),#00B894);
+  border:none;border-radius:var(--r12);padding:13px;color:#0D0D0D;
+  font-weight:800;font-size:0.9rem;cursor:pointer;}
+
+/* Barra de input */
+#denaro-input-bar{position:absolute;bottom:58px;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:10px 14px;display:flex;gap:10px;align-items:flex-end;z-index:3;}
+.denaro-textarea{flex:1;background:var(--card);border:1.5px solid var(--border2);
+  border-radius:22px;color:var(--white);font-family:inherit;font-size:0.9rem;
+  padding:10px 16px;outline:none;resize:none;max-height:100px;min-height:44px;
+  line-height:1.4;-webkit-appearance:none;display:block;}
+.denaro-textarea:focus{border-color:var(--mint);}
+.denaro-send{width:44px;height:44px;min-width:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--mint),#00B894);border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  font-size:1.3rem;flex-shrink:0;
-}
-.ch-name{font-size:0.95rem;font-weight:800;letter-spacing:0.01em;}
-.ch-status{font-size:0.7rem;color:var(--ink3);margin-top:2px;display:flex;align-items:center;gap:5px;}
+  box-shadow:0 4px 12px rgba(0,212,170,0.3);}
+.denaro-send svg{width:18px;height:18px;stroke:#0D0D0D;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.denaro-send:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* Burbujas */
+.d-msg{display:flex;gap:8px;align-items:flex-end;width:100%;}
+.d-msg.d-user{flex-direction:row-reverse;}
+.d-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  background:var(--card2);border:1px solid var(--border2);}
+.d-av.d-bot-av{background:linear-gradient(135deg,#1a2a1a,#2a1a2a);border-color:var(--mint);}
+.d-bubble{max-width:82%;padding:10px 14px;border-radius:18px;
+  font-size:0.85rem;line-height:1.6;word-break:break-word;}
+.d-msg.d-bot .d-bubble{background:var(--card);border:1px solid var(--border2);
+  color:var(--ink);border-bottom-left-radius:4px;}
+.d-msg.d-user .d-bubble{background:linear-gradient(135deg,var(--mint),#00B894);
+  color:#0D0D0D;border-bottom-right-radius:4px;font-weight:500;}
+.d-bubble p{margin:0 0 7px;}
+.d-bubble p:last-child{margin:0;}
+.d-bubble strong{font-weight:700;}
+.d-bubble em{opacity:0.75;}
+.d-time{font-size:0.65rem;color:var(--ink3);margin-top:2px;padding:0 2px;}
+
+/* Typing */
+.d-typing{display:flex;gap:5px;align-items:center;padding:4px 0;}
+.d-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);
+  animation:dpulse 1.2s ease-in-out infinite;}
+.d-dot:nth-child(2){animation-delay:0.2s;}
+.d-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes dpulse{0%,100%{opacity:0.3;transform:scale(0.8);}50%{opacity:1;transform:scale(1);}}
+
+/* Sugerencias */
+.d-quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.d-quick-btn{padding:9px 10px;border-radius:12px;border:1.5px solid var(--border2);
+  background:var(--card2);color:var(--mint);font-size:0.75rem;font-weight:600;
+  cursor:pointer;font-family:inherit;text-align:left;line-height:1.3;
+  -webkit-tap-highlight-color:transparent;}
+.d-quick-btn:active{background:var(--mint-dim);border-color:var(--mint);}
+
+/* Header elementos */
+.ch-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#1a2a1a,#2a1a2a);
+  border:2px solid var(--mint);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.ch-name{font-size:0.9rem;font-weight:800;}
+.ch-status{font-size:0.66rem;color:var(--ink3);margin-top:1px;display:flex;align-items:center;gap:4px;}
 .status-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);display:inline-block;animation:pulse 2s infinite;}
 .status-dot.busy{background:var(--gold);animation:pulse 0.8s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 .ch-info{flex:1;}
-.ch-clear{
-  background:none;border:1px solid var(--border2);border-radius:50%;
-  width:34px;height:34px;color:var(--ink2);cursor:pointer;font-size:1rem;
-  display:flex;align-items:center;justify-content:center;
-  transition:border-color .15s,color .15s;
-}
-.ch-clear:hover{border-color:var(--mint);color:var(--mint);}
+.ch-clear{background:none;border:1px solid var(--border2);border-radius:50%;
+  width:32px;height:32px;color:var(--ink2);cursor:pointer;font-size:0.9rem;
+  display:flex;align-items:center;justify-content:center;}
+.ch-clear:active{background:var(--card2);}
 
-.chat-context-bar{
-  background:var(--mint-dim);border-bottom:1px solid rgba(0,212,170,0.2);
-  padding:8px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
-}
-.ccb-label{font-size:0.66rem;font-weight:700;color:var(--mint);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;}
-.ccb-vals{font-size:0.72rem;color:rgba(0,212,170,0.7);font-weight:500;}
-
-.chat-messages{
-  flex:1;overflow-y:auto;padding:20px;
-  display:flex;flex-direction:column;gap:16px;
-  padding-bottom:160px;
-}
-.msg-bubble{display:flex;gap:10px;align-items:flex-start;}
-.msg-bubble.msg-user{flex-direction:row-reverse;}
-
-.msg-avatar{
-  width:32px;height:32px;border-radius:50%;flex-shrink:0;
-  background:var(--card2);border:1px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;font-size:0.9rem;
-  margin-top:2px;
-}
-.msg-bubble.msg-user .msg-avatar{background:var(--mint-dim);border-color:var(--mint);}
-
-.msg-content{
-  max-width:78%;background:var(--card);border:1px solid var(--border);
-  border-radius:0 var(--r16) var(--r16) var(--r16);
-  padding:12px 16px;font-size:0.86rem;line-height:1.55;color:var(--ink);
-}
-.msg-bubble.msg-user .msg-content{
-  background:linear-gradient(135deg,rgba(0,212,170,0.15),rgba(0,184,148,0.1));
-  border-color:rgba(0,212,170,0.25);
-  border-radius:var(--r16) 0 var(--r16) var(--r16);
-  color:var(--ink);
-}
-.msg-content p{margin:0 0 8px;}
-.msg-content p:last-child{margin:0;}
-.msg-content strong{color:var(--white);font-weight:700;}
-.msg-content em{color:var(--ink2);}
-
-.typing-indicator{display:flex;gap:4px;padding:4px 0;}
-.typing-indicator span{
-  width:7px;height:7px;border-radius:50%;background:var(--mint);opacity:0.4;
-  animation:typing 1.2s infinite;
-}
-.typing-indicator span:nth-child(2){animation-delay:.2s;}
-.typing-indicator span:nth-child(3){animation-delay:.4s;}
-@keyframes typing{0%,100%{opacity:0.2;transform:translateY(0);}50%{opacity:0.8;transform:translateY(-4px);}}
-
-.api-key-banner{
-  position:absolute;bottom:130px;left:0;right:0;
-  background:var(--card2);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);
-  padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:10;
-}
-.api-key-banner span{font-size:1rem;flex-shrink:0;}
-.api-key-banner input{
-  flex:1;background:var(--card);border:1px solid var(--border2);border-radius:var(--r8);
-  padding:8px 12px;font-size:0.78rem;color:var(--white);
-}
-.api-key-banner input:focus{outline:none;border-color:var(--mint);}
-.api-key-banner button{
-  background:var(--mint);border:none;border-radius:var(--r8);
-  padding:8px 14px;color:#0D0D0D;font-weight:800;font-size:0.76rem;cursor:pointer;white-space:nowrap;
-}
-
-.chat-input-bar{
-  position:absolute;bottom:70px;left:0;right:0;
-  padding:12px 16px;
-  background:var(--bg);border-top:1px solid var(--border);
-  display:flex;gap:10px;align-items:center;
-  z-index:10;
-}
-.chat-input-bar input{
-  flex:1;background:var(--card);border:1px solid var(--border2);border-radius:999px;
-  padding:11px 18px;font-size:0.88rem;color:var(--white);
-  transition:border-color .2s;
-}
-.chat-input-bar input:focus{outline:none;border-color:var(--mint);}
-.chat-send-btn{
-  width:42px;height:42px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,var(--mint),#00B894);
-  border:none;color:#0D0D0D;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 12px rgba(0,212,170,0.3);
-  transition:transform .1s,opacity .15s;
-}
-.chat-send-btn:active{transform:scale(0.93);}
-.chat-send-btn:disabled{opacity:0.5;cursor:not-allowed;}
-
-.suggested-questions{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
-.sq-btn{
-  background:var(--card2);border:1px solid var(--border2);border-radius:var(--r12);
-  padding:10px 14px;font-size:0.8rem;color:var(--mint);cursor:pointer;text-align:left;
-  transition:border-color .15s,background .15s;font-weight:500;
-}
-.sq-btn:hover{border-color:var(--mint);background:var(--mint-dim);}
 </style>
 </head>
 <body>
@@ -892,7 +865,9 @@ button,input,select{font-family:inherit;}
 
   <!-- CONSEJERO -->
   <div class="screen" id="screen-consejero">
-    <div class="consejero-header">
+
+    <!-- Header -->
+    <div id="denaro-header">
       <div class="ch-avatar">🎩</div>
       <div class="ch-info">
         <div class="ch-name">Sr. Denaro</div>
@@ -901,31 +876,47 @@ button,input,select{font-family:inherit;}
       <button class="ch-clear" onclick="clearChat()" title="Nueva conversación">↺</button>
     </div>
 
-    <div class="chat-context-bar" id="chatContextBar">
-      <span class="ccb-label">Contexto financiero activo</span>
-      <span class="ccb-vals" id="chatContextVals">—</span>
+    <!-- Contexto financiero -->
+    <div id="denaro-ctx">
+      <span class="dctx-label">Contexto</span>
+      <span class="dctx-vals" id="chatContextVals">—</span>
     </div>
 
-    <div class="chat-messages" id="chatMessages">
-      <div class="msg-bubble msg-bot">
-        <div class="msg-avatar">🎩</div>
-        <div class="msg-content" id="welcomeMsgContent">
-          <p>Buonasera. Soy el <strong>Sr. Denaro</strong>, su consejero financiero personal.</p>
-          <p>Tengo acceso a su situación en Denaro. Pero primero... ¿con quién tengo el placer? <em>¿Es usted hombre o mujer?</em></p>
+    <!-- Mensajes -->
+    <div id="denaro-msgs" style="display:flex;flex-direction:column;gap:10px;">
+      <div class="d-msg d-bot">
+        <div class="d-av d-bot-av">🎩</div>
+        <div>
+          <div class="d-bubble" id="welcomeMsgContent">
+            <p>Buonasera. Soy el <strong>Sr. Denaro</strong>, su consejero financiero personal.</p>
+            <p>Tengo acceso a su situación en Denaro. Pero primero... ¿con quién tengo el placer? <em>¿Es usted hombre o mujer?</em></p>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="api-key-banner" id="apiKeyBanner">
-      <span>🔑</span>
-      <input type="text" id="apiKeyInput" placeholder="API Key de Google AI Studio (AIza...)" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text">
-      <button onclick="saveApiKey()">Guardar</button>
+    <!-- Sin API Key -->
+    <div id="denaro-nokey" style="display:none;">
+      <div style="font-size:2rem;">🔑</div>
+      <div class="dnokey-title">Configura tu API Key</div>
+      <div class="dnokey-desc">Para hablar con el Sr. Denaro necesitas una API Key gratuita de Google AI Studio.<br><br>Ve a <strong>aistudio.google.com</strong> → Get API Key → copia la key que empieza por <strong>AIza...</strong></div>
+      <input class="dnokey-input" type="text" id="apiKeyInput"
+        placeholder="AIzaSy..."
+        autocomplete="off" autocorrect="off" autocapitalize="none"
+        spellcheck="false" inputmode="url">
+      <button class="dnokey-btn" onclick="saveApiKey()">Guardar y continuar</button>
     </div>
 
-    <div class="chat-input-bar">
-      <input type="text" id="chatInput" placeholder="Escribe tu pregunta..." autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true" onkeydown="if(event.key==='Enter')sendMessage()">
-      <button class="chat-send-btn" onclick="sendMessage()" id="chatSendBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    <!-- Input bar -->
+    <div id="denaro-input-bar">
+      <textarea class="denaro-textarea" id="chatInput"
+        placeholder="Escribe tu pregunta..."
+        autocomplete="off" autocorrect="on" autocapitalize="sentences"
+        spellcheck="true" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+      <button class="denaro-send" onclick="sendMessage()" id="chatSendBtn">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
     </div>
 
@@ -1641,16 +1632,20 @@ function saveApiKey(){
   const k = document.getElementById('apiKeyInput').value.trim();
   if(!k){ showToast('Pega primero tu API Key'); return; }
   localStorage.setItem(APIKEY_KEY, k);
-  document.getElementById('apiKeyBanner').style.display='none';
+  document.getElementById('denaro-nokey').style.display='none';
+  document.getElementById('denaro-msgs').style.display='flex';
+  document.getElementById('denaro-input-bar').style.display='flex';
   showToast('API Key guardada ✓');
+  document.getElementById('chatInput').focus();
 }
 
 function goConsejero(){
   showScreen('consejero','Sr. Denaro',false);
-  const banner = document.getElementById('apiKeyBanner');
-  banner.style.display = getApiKey() ? 'none' : 'flex';
+  const hasKey = !!getApiKey();
+  document.getElementById('denaro-nokey').style.display = hasKey ? 'none' : 'flex';
+  document.getElementById('denaro-msgs').style.display = hasKey ? 'flex' : 'none';
+  document.getElementById('denaro-input-bar').style.display = hasKey ? 'flex' : 'none';
   updateChatContext();
-  // Actualizar mensaje de bienvenida según género y situación actual
   const welcomeEl = document.getElementById('welcomeMsgContent');
   if(welcomeEl && chatHistory.length === 0){
     welcomeEl.innerHTML = getBienvenida();
@@ -1842,31 +1837,34 @@ function setBusy(busy){
     `<span class="status-dot${busy?' busy':''}"></span> ${busy?'Escribiendo…':'Disponible'}`;
 }
 
+function getMsgsContainer(){ return document.getElementById('denaro-msgs'); }
+
 function addUserMessage(text){
-  const msgs=document.getElementById('chatMessages');
+  const msgs=getMsgsContainer();
+  const now=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
   const div=document.createElement('div');
-  div.className='msg-bubble msg-user';
-  div.innerHTML=`<div class="msg-avatar">👤</div><div class="msg-content">${escapeHtml(text)}</div>`;
+  div.className='d-msg d-user';
+  div.innerHTML=`<div class="d-av">👤</div><div><div class="d-bubble">${escapeHtml(text)}</div><div class="d-time" style="text-align:right">${now}</div></div>`;
   msgs.appendChild(div);
   msgs.scrollTop=msgs.scrollHeight;
 }
 
 function addBotMessage(html){
-  const msgs=document.getElementById('chatMessages');
-  const div=document.createElement('div');
-  div.className='msg-bubble msg-bot';
-  // Convertir saltos de línea en párrafos
+  const msgs=getMsgsContainer();
+  const now=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
   const formatted=html.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
-  div.innerHTML=`<div class="msg-avatar">🎩</div><div class="msg-content"><p>${formatted}</p></div>`;
+  const div=document.createElement('div');
+  div.className='d-msg d-bot';
+  div.innerHTML=`<div class="d-av d-bot-av">🎩</div><div><div class="d-bubble"><p>${formatted}</p></div><div class="d-time">${now}</div></div>`;
   msgs.appendChild(div);
   msgs.scrollTop=msgs.scrollHeight;
 }
 
 function addTypingIndicator(){
-  const msgs=document.getElementById('chatMessages');
+  const msgs=getMsgsContainer();
   const div=document.createElement('div');
-  div.className='msg-bubble msg-bot'; div.id='typingIndicator';
-  div.innerHTML=`<div class="msg-avatar">🎩</div><div class="msg-content"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+  div.className='d-msg d-bot'; div.id='typingIndicator';
+  div.innerHTML=`<div class="d-av d-bot-av">🎩</div><div class="d-bubble"><div class="d-typing"><span class="d-dot"></span><span class="d-dot"></span><span class="d-dot"></span></div></div>`;
   msgs.appendChild(div);
   msgs.scrollTop=msgs.scrollHeight;
 }
@@ -1918,15 +1916,18 @@ function getBienvenida(){
 function clearChat(){
   chatHistory=[];
   localStorage.removeItem('denaroUserGenero');
-  const msgs=document.getElementById('chatMessages');
-  msgs.innerHTML=`<div class="msg-bubble msg-bot">
-    <div class="msg-avatar">🎩</div>
-    <div class="msg-content">
-      ${getBienvenida()}
-      <div class="suggested-questions">
-        <button class="sq-btn" onclick="quickAsk('¿Cómo puedo mejorar mi ahorro este mes?')">💡 ¿Cómo mejorar mi ahorro?</button>
-        <button class="sq-btn" onclick="quickAsk('¿En qué debería invertir con mi nivel de ahorro actual?')">📈 ¿Dónde invertir?</button>
-        <button class="sq-btn" onclick="quickAsk('¿Cuál es mi mayor problema financiero según mis datos?')">🔍 Analiza mi situación</button>
+  const msgs=getMsgsContainer();
+  msgs.innerHTML=`<div class="d-msg d-bot">
+    <div class="d-av d-bot-av">🎩</div>
+    <div>
+      <div class="d-bubble">
+        ${getBienvenida()}
+        <div class="d-quick-grid">
+          <button class="d-quick-btn" onclick="quickAsk('¿Cómo puedo mejorar mi ahorro este mes?')">💡 ¿Cómo mejorar mi ahorro?</button>
+          <button class="d-quick-btn" onclick="quickAsk('¿En qué debería invertir con mi nivel de ahorro actual?')">📈 ¿Dónde invertir?</button>
+          <button class="d-quick-btn" onclick="quickAsk('¿Cuál es mi mayor problema financiero según mis datos?')">🔍 Analiza mi situación</button>
+          <button class="d-quick-btn" onclick="quickAsk('Dame 3 consejos concretos para este mes')">🎯 Consejos del mes</button>
+        </div>
       </div>
     </div>
   </div>`;
@@ -1934,7 +1935,9 @@ function clearChat(){
 }
 
 function quickAsk(text){
-  document.getElementById('chatInput').value=text;
+  const input=document.getElementById('chatInput');
+  input.value=text;
+  input.style.height='auto';
   sendMessage();
 }
 
