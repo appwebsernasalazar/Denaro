@@ -513,7 +513,7 @@ button,input,select{font-family:inherit;}
 .dctx-vals{font-size:0.7rem;color:rgba(0,212,170,0.7);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* Mensajes — scrollable */
-#denaro-msgs{position:absolute;top:88px;left:0;right:0;bottom:130px;
+#denaro-msgs{position:absolute;top:88px;left:0;right:0;bottom:126px;
   overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;}
 
@@ -532,7 +532,7 @@ button,input,select{font-family:inherit;}
   font-weight:800;font-size:0.9rem;cursor:pointer;}
 
 /* Barra de input */
-#denaro-input-bar{position:absolute;bottom:58px;left:0;right:0;
+#denaro-input-bar{position:absolute;bottom:56px;left:0;right:0;
   background:var(--bg2);border-top:1px solid var(--border);
   padding:10px 14px;display:flex;gap:10px;align-items:flex-end;z-index:3;}
 .denaro-textarea{flex:1;background:var(--card);border:1.5px solid var(--border2);
@@ -1259,6 +1259,11 @@ function showScreen(id,title,showBack){
   document.getElementById('screen-'+id).classList.add('active');
   document.getElementById('screenTitle').textContent=title;
   document.getElementById('backBtn').classList.toggle('show',!!showBack);
+  // Restaurar topbar si salimos del consejero
+  if(id !== 'consejero'){
+    document.querySelector('.topbar').style.display='';
+    document.getElementById('syncBar').style.display='';
+  }
 }
 function goHome(){
   showScreen('home','Denaro',false);
@@ -1640,6 +1645,9 @@ function saveApiKey(){
 }
 
 function goConsejero(){
+  // Ocultar topbar y syncbar globales — el consejero tiene los suyos
+  document.querySelector('.topbar').style.display='none';
+  document.getElementById('syncBar').style.display='none';
   showScreen('consejero','Sr. Denaro',false);
   const hasKey = !!getApiKey();
   document.getElementById('denaro-nokey').style.display = hasKey ? 'none' : 'flex';
@@ -1764,12 +1772,11 @@ async function sendMessage(){
   addTypingIndicator();
 
   try{
-    // Intentar primero con gemini-2.0-flash, si falla con 429 usar gemini-1.5-flash
+    // Modelos actuales de Google AI Studio (julio 2026)
     const MODELS = [
+      'gemini-2.5-flash',
       'gemini-2.0-flash',
-      'gemini-2.0-flash-lite',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-flash-8b-latest',
+      'gemini-2.5-flash-lite-preview',
     ];
     let res, usedModel;
 
@@ -1779,10 +1786,13 @@ async function sendMessage(){
         parts: [{ text: m.content }]
       }));
       res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
           body: JSON.stringify({
             system_instruction: { parts: [{ text: buildSystemPrompt() }] },
             contents: geminiContents,
@@ -1791,20 +1801,23 @@ async function sendMessage(){
         }
       );
       usedModel = model;
-      if(res.status !== 429) break; // si no es rate limit, salir del loop
-      await new Promise(r => setTimeout(r, 1500)); // esperar 1.5s antes del siguiente intento
+      // Salir si respondió OK o si el error NO es 404/429 (para no reintentar en error de key)
+      if(res.ok || (res.status !== 404 && res.status !== 429)) break;
+      await new Promise(r => setTimeout(r, 800));
     }
 
     removeTypingIndicator();
 
     if(!res.ok){
       const err=await res.json().catch(()=>({}));
-      const errMsg = res.status===400
-        ? 'API Key inválida. Verifica que sea la key de Google AI Studio (AIza...).'
+      const errMsg = res.status===400||res.status===401
+        ? 'API Key inválida. Ve a aistudio.google.com y genera una nueva key (AIza...).'
         : res.status===403
-        ? 'Acceso denegado. Ve a aistudio.google.com, genera una nueva API Key y pégala aquí.'
+        ? 'Sin acceso. Verifica que tu key de AI Studio esté activa en aistudio.google.com.'
         : res.status===429
-        ? 'Límite de peticiones alcanzado en ambos modelos. Espera 1 minuto e intenta de nuevo.'
+        ? 'Demasiadas peticiones. Espera 1 minuto e intenta de nuevo.'
+        : res.status===404
+        ? 'Modelo no disponible con tu plan. Intenta regenerar tu API key en aistudio.google.com.'
         : `Error ${res.status}: ${err.error?.message||'algo salió mal'}`;
       addBotMessage(`<em>${errMsg}</em>`);
       setBusy(false);
