@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -660,8 +660,33 @@ button,input,select{font-family:inherit;}
       </div>
     </div>
 
+    <!-- Campos solo visibles al registrarse -->
+    <div id="authSecurityFields" style="display:none;">
+      <div class="auth-field">
+        <label>Pregunta de seguridad</label>
+        <select id="authQuestion" style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:var(--r12);padding:13px 16px;font-size:0.88rem;color:var(--white);">
+          <option value="">— Elige una pregunta —</option>
+          <option value="¿Cuál es el nombre de tu primera mascota?">¿Cuál es el nombre de tu primera mascota?</option>
+          <option value="¿En qué ciudad naciste?">¿En qué ciudad naciste?</option>
+          <option value="¿Cuál es el apellido de soltera de tu madre?">¿Cuál es el apellido de soltera de tu madre?</option>
+          <option value="¿Cuál fue el nombre de tu colegio?">¿Cuál fue el nombre de tu colegio?</option>
+          <option value="¿Cuál es tu comida favorita?">¿Cuál es tu comida favorita?</option>
+          <option value="¿Cuál es el nombre de tu mejor amigo de infancia?">¿Cuál es el nombre de tu mejor amigo de infancia?</option>
+        </select>
+      </div>
+      <div class="auth-field">
+        <label>Respuesta de seguridad</label>
+        <input type="text" id="authAnswer" placeholder="Tu respuesta (guárdala bien)" autocomplete="off">
+      </div>
+    </div>
+
     <button class="auth-btn" id="authSubmitBtn" onclick="submitAuth()">Entrar</button>
     <div class="auth-msg" id="authMsg"></div>
+
+    <!-- Enlace de recuperación solo en login -->
+    <div id="forgotLink" style="text-align:center;margin-top:14px;">
+      <span onclick="openRecovery()" style="font-size:0.78rem;color:var(--mint);cursor:pointer;font-weight:600;">¿Olvidaste tu contraseña?</span>
+    </div>
 
     <div class="auth-setup" id="authSetupBox">
       <div class="auth-setup-toggle" onclick="toggleAuthSetup()">
@@ -674,6 +699,47 @@ button,input,select{font-family:inherit;}
         <button class="auth-setup-save" onclick="saveScriptUrlFromAuth()">Guardar conexión</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ===== RECOVERY MODAL ===== -->
+<div class="modal-overlay" id="recoveryOverlay">
+  <div class="backup-modal">
+    <div class="bm-handle"></div>
+    <h2>Recuperar contraseña</h2>
+
+    <div id="recovStep1">
+      <p style="font-size:0.82rem;color:var(--ink2);margin-bottom:20px;line-height:1.5;">Introduce tu correo y te mostraremos tu pregunta de seguridad.</p>
+      <div class="auth-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="recovEmail" placeholder="tucorreo@ejemplo.com">
+      </div>
+      <button class="auth-btn" onclick="recovStep1()">Continuar</button>
+      <div class="auth-msg" id="recovMsg1"></div>
+    </div>
+
+    <div id="recovStep2" style="display:none;">
+      <p style="font-size:0.82rem;color:var(--ink2);margin-bottom:16px;line-height:1.5;">Responde tu pregunta de seguridad.</p>
+      <div class="auth-field">
+        <label>Pregunta de seguridad</label>
+        <div id="recovQuestionText" style="font-size:0.9rem;font-weight:700;color:var(--white);padding:12px 14px;background:var(--card);border-radius:var(--r12);border:1px solid var(--border2);"></div>
+      </div>
+      <div class="auth-field">
+        <label>Tu respuesta</label>
+        <input type="text" id="recovAnswer" placeholder="Escribe tu respuesta" autocomplete="off">
+      </div>
+      <div class="auth-field">
+        <label>Nueva contraseña</label>
+        <div class="pwd-wrap">
+          <input type="password" id="recovNewPwd" placeholder="Mínimo 4 caracteres">
+          <button type="button" class="pwd-eye" onclick="togglePwd('recovNewPwd',this)">👁</button>
+        </div>
+      </div>
+      <button class="auth-btn" onclick="recovStep2()">Cambiar contraseña</button>
+      <div class="auth-msg" id="recovMsg2"></div>
+    </div>
+
+    <button class="bm-close" onclick="closeRecovery()">Cancelar</button>
   </div>
 </div>
 
@@ -852,7 +918,7 @@ button,input,select{font-family:inherit;}
 
     <div class="api-key-banner" id="apiKeyBanner">
       <span>🔑</span>
-      <input type="password" id="apiKeyInput" placeholder="API Key de Anthropic (sk-ant-...)">
+      <input type="password" id="apiKeyInput" placeholder="API Key de Google AI Studio (AIza...)">
       <button onclick="saveApiKey()">Guardar</button>
     </div>
 
@@ -1120,6 +1186,8 @@ function switchAuthTab(mode){
   document.getElementById('tabLogin').classList.toggle('active',mode==='login');
   document.getElementById('tabRegister').classList.toggle('active',mode==='register');
   document.getElementById('authPasswordConfirmField').style.display=mode==='register'?'block':'none';
+  document.getElementById('authSecurityFields').style.display=mode==='register'?'block':'none';
+  document.getElementById('forgotLink').style.display=mode==='login'?'block':'none';
   document.getElementById('authSubmitBtn').textContent=mode==='register'?'Crear mi cuenta':'Entrar';
   document.getElementById('authMsg').textContent='';
 }
@@ -1150,12 +1218,21 @@ async function submitAuth(){
   if(authMode==='register'){
     const conf=document.getElementById('authPasswordConfirm').value;
     if(pwd!==conf){ showAuthMsg('Las contraseñas no coinciden',false); return; }
+    const question=document.getElementById('authQuestion').value;
+    const answer=document.getElementById('authAnswer').value.trim();
+    if(!question){ showAuthMsg('Elige una pregunta de seguridad',false); return; }
+    if(!answer){ showAuthMsg('Escribe tu respuesta de seguridad',false); return; }
   }
   const btn=document.getElementById('authSubmitBtn');
   btn.disabled=true;
   showAuthMsg(authMode==='register'?'Creando cuenta…':'Entrando…',true);
   try{
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:authMode,email,password:pwd})});
+    const body={action:authMode,email,password:pwd};
+    if(authMode==='register'){
+      body.question=document.getElementById('authQuestion').value;
+      body.answer=document.getElementById('authAnswer').value.trim();
+    }
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
     const json=await res.json();
     if(!json.ok){ showAuthMsg(json.error||'Error desconocido',false); btn.disabled=false; return; }
     setSession({token:json.token,email:json.email});
@@ -1478,6 +1555,70 @@ function exportBackup(){
   showToast('Copia descargada ✓');
 }
 
+/* ============ RECUPERACIÓN DE CUENTA ============ */
+function openRecovery(){
+  document.getElementById('recovEmail').value='';
+  document.getElementById('recovAnswer').value='';
+  document.getElementById('recovNewPwd').value='';
+  document.getElementById('recovMsg1').textContent='';
+  document.getElementById('recovMsg2').textContent='';
+  document.getElementById('recovStep1').style.display='block';
+  document.getElementById('recovStep2').style.display='none';
+  document.getElementById('recoveryOverlay').classList.add('open');
+}
+function closeRecovery(){
+  document.getElementById('recoveryOverlay').classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('recoveryOverlay').addEventListener('click',e=>{
+    if(e.target.id==='recoveryOverlay') closeRecovery();
+  });
+});
+
+async function recovStep1(){
+  const email=document.getElementById('recovEmail').value.trim();
+  const msgEl=document.getElementById('recovMsg1');
+  if(!email){ msgEl.textContent='Introduce tu correo.'; msgEl.className='auth-msg'; return; }
+  msgEl.textContent='Buscando cuenta…'; msgEl.className='auth-msg ok';
+  const url=getScriptUrl();
+  try{
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'getQuestion',email})});
+    const json=await res.json();
+    if(!json.ok){ msgEl.textContent=json.error||'Error'; msgEl.className='auth-msg'; return; }
+    document.getElementById('recovQuestionText').textContent=json.question;
+    document.getElementById('recovStep1').style.display='none';
+    document.getElementById('recovStep2').style.display='block';
+    document.getElementById('recovMsg2').textContent='';
+  }catch(e){
+    msgEl.textContent='No se pudo conectar.'; msgEl.className='auth-msg';
+  }
+}
+
+async function recovStep2(){
+  const email=document.getElementById('recovEmail').value.trim();
+  const answer=document.getElementById('recovAnswer').value.trim();
+  const newPwd=document.getElementById('recovNewPwd').value;
+  const msgEl=document.getElementById('recovMsg2');
+  if(!answer){ msgEl.textContent='Escribe tu respuesta.'; msgEl.className='auth-msg'; return; }
+  if(!newPwd||newPwd.length<4){ msgEl.textContent='La contraseña debe tener al menos 4 caracteres.'; msgEl.className='auth-msg'; return; }
+  msgEl.textContent='Verificando…'; msgEl.className='auth-msg ok';
+  const url=getScriptUrl();
+  try{
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'recover',email,answer,newPassword:newPwd})});
+    const json=await res.json();
+    if(!json.ok){ msgEl.textContent=json.error||'Error'; msgEl.className='auth-msg'; return; }
+    // Éxito — iniciar sesión automáticamente
+    setSession({token:json.token,email:json.email});
+    closeRecovery();
+    showToast('¡Contraseña cambiada! Entrando…');
+    await enterApp();
+  }catch(e){
+    msgEl.textContent='No se pudo conectar.'; msgEl.className='auth-msg';
+  }
+}
+
 /* ============ INIT ============ */
 async function init(){
   const session=getSession(), url=getScriptUrl();
@@ -1628,28 +1769,31 @@ async function sendMessage(){
   addTypingIndicator();
 
   try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body: JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        system: buildSystemPrompt(),
-        messages: chatHistory
-      })
-    });
+    // Construir historial en formato Gemini
+    const geminiContents = chatHistory.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: buildSystemPrompt() }] },
+          contents: geminiContents,
+          generationConfig: { maxOutputTokens: 1000, temperature: 0.85 }
+        })
+      }
+    );
 
     removeTypingIndicator();
 
     if(!res.ok){
       const err=await res.json().catch(()=>({}));
-      const errMsg = res.status===401
-        ? 'API Key inválida. Verifica que sea correcta en la configuración.'
+      const errMsg = res.status===400
+        ? 'API Key inválida. Verifica que sea la key de Google AI Studio (AIza...).'
         : res.status===429
         ? 'Demasiadas solicitudes. Espera un momento y vuelve a intentarlo.'
         : `Error ${res.status}: ${err.error?.message||'algo salió mal'}`;
@@ -1659,7 +1803,7 @@ async function sendMessage(){
     }
 
     const data=await res.json();
-    const reply=data.content?.[0]?.text||'No obtuve respuesta. Inténtalo de nuevo.';
+    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'No obtuve respuesta. Inténtalo de nuevo.';
     chatHistory.push({role:'assistant',content:reply});
 
     // Detectar si el usuario respondió su género en el mensaje enviado
