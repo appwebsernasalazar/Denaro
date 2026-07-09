@@ -244,6 +244,20 @@ button,input,select{font-family:inherit;}
 .predict-card .p-ico{font-size:1.6rem;flex-shrink:0;}
 .predict-card b{color:var(--white);font-weight:700;}
 
+/* Selector de moneda */
+.currency-bar{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r12);
+  padding:10px 16px;
+}
+.cur-lbl{font-size:0.78rem;font-weight:700;color:var(--ink2);white-space:nowrap;}
+#currencySelect{
+  flex:1;background:transparent;border:none;color:var(--white);
+  font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;
+  outline:none;
+}
+#currencySelect option{background:var(--card);color:var(--white);}
+
 /* Chart panel */
 .chart-panel{
   background:var(--card);border:1px solid var(--border);
@@ -538,8 +552,12 @@ button,input,select{font-family:inherit;}
 .denaro-textarea{flex:1;background:var(--card);border:1.5px solid var(--border2);
   border-radius:22px;color:var(--white);font-family:inherit;font-size:0.9rem;
   padding:10px 16px;outline:none;resize:none;max-height:100px;min-height:44px;
-  line-height:1.4;-webkit-appearance:none;display:block;}
+  line-height:1.4;-webkit-appearance:none;appearance:none;display:block;
+  -webkit-user-select:text;user-select:text;}
 .denaro-textarea:focus{border-color:var(--mint);}
+/* Eliminar toolbar de iOS (flechas arriba/abajo y chulo) */
+.denaro-textarea::-webkit-input-placeholder{color:var(--ink3);}
+.denaro-textarea::placeholder{color:var(--ink3);}
 .denaro-send{width:44px;height:44px;min-width:44px;border-radius:50%;
   background:linear-gradient(135deg,var(--mint),#00B894);border:none;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
@@ -555,12 +573,13 @@ button,input,select{font-family:inherit;}
   background:var(--card2);border:1px solid var(--border2);}
 .d-av.d-bot-av{background:linear-gradient(135deg,#1a2a1a,#2a1a2a);border-color:var(--mint);}
 .d-bubble{max-width:82%;padding:10px 14px;border-radius:18px;
-  font-size:0.85rem;line-height:1.6;word-break:break-word;}
+  font-size:0.85rem;line-height:1.6;word-break:break-word;overflow-wrap:break-word;
+  word-wrap:break-word;white-space:pre-wrap;}
 .d-msg.d-bot .d-bubble{background:var(--card);border:1px solid var(--border2);
   color:var(--ink);border-bottom-left-radius:4px;}
 .d-msg.d-user .d-bubble{background:linear-gradient(135deg,var(--mint),#00B894);
   color:#0D0D0D;border-bottom-right-radius:4px;font-weight:500;}
-.d-bubble p{margin:0 0 7px;}
+.d-bubble p{margin:0 0 7px;white-space:normal;}
 .d-bubble p:last-child{margin:0;}
 .d-bubble strong{font-weight:700;}
 .d-bubble em{opacity:0.75;}
@@ -752,6 +771,14 @@ button,input,select{font-family:inherit;}
         <div id="predictTxt">Registra tu primer movimiento para ver la predicción.</div>
       </div>
 
+      <!-- Selector de moneda -->
+      <div class="currency-bar">
+        <span class="cur-lbl">💱 Moneda</span>
+        <select id="currencySelect" onchange="changeCurrency(this.value)">
+          <option value="">— Elige —</option>
+        </select>
+      </div>
+
       <div class="chart-panel">
         <div class="chart-title">Ingresos vs Gastos — últimos 4 meses</div>
         <div class="chart-box"><canvas id="homeChart"></canvas></div>
@@ -911,8 +938,9 @@ button,input,select{font-family:inherit;}
     <div id="denaro-input-bar">
       <textarea class="denaro-textarea" id="chatInput"
         placeholder="Escribe tu pregunta..."
-        autocomplete="off" autocorrect="on" autocapitalize="sentences"
-        spellcheck="true" rows="1"
+        autocomplete="off" autocorrect="off" autocapitalize="sentences"
+        spellcheck="false" rows="1"
+        enterkeyhint="send"
         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
         oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
       <button class="denaro-send" onclick="sendMessage()" id="chatSendBtn">
@@ -1021,7 +1049,21 @@ const INCOME_CATS = [
 const CAT_BY_ID = {};
 [...EXPENSE_CATS,...INCOME_CATS].forEach(c=>CAT_BY_ID[c.id]=c);
 
-const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const CURRENCIES = {
+  'EUR': { symbol:'€', locale:'es-ES', name:'Euro (€)' },
+  'USD': { symbol:'$', locale:'en-US', name:'Dólar USA ($)' },
+  'COP': { symbol:'$', locale:'es-CO', name:'Peso colombiano ($)' },
+  'MXN': { symbol:'$', locale:'es-MX', name:'Peso mexicano ($)' },
+  'ARS': { symbol:'$', locale:'es-AR', name:'Peso argentino ($)' },
+  'CLP': { symbol:'$', locale:'es-CL', name:'Peso chileno ($)' },
+  'PEN': { symbol:'S/', locale:'es-PE', name:'Sol peruano (S/)' },
+  'GBP': { symbol:'£', locale:'en-GB', name:'Libra esterlina (£)' },
+  'BRL': { symbol:'R$', locale:'pt-BR', name:'Real brasileño (R$)' },
+  'VES': { symbol:'Bs', locale:'es-VE', name:'Bolívar venezolano (Bs)' },
+};
+const CURRENCY_KEY = 'denaroMoneda';
+function getCurrency(){ return localStorage.getItem(CURRENCY_KEY) || 'EUR'; }
+function setCurrency(code){ localStorage.setItem(CURRENCY_KEY, code); }
 const MONTHS_FULL  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 /* ============ ESTADO ============ */
@@ -1126,8 +1168,14 @@ async function saveData(data, silent){
 }
 
 /* ============ HELPERS ============ */
-function fmt(n){ return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n||0); }
-function fmtDec(n){ return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(n||0); }
+function fmt(n){
+  const c=getCurrency(), cur=CURRENCIES[c]||CURRENCIES['EUR'];
+  return new Intl.NumberFormat(cur.locale,{style:'currency',currency:c,maximumFractionDigits:0}).format(n||0);
+}
+function fmtDec(n){
+  const c=getCurrency(), cur=CURRENCIES[c]||CURRENCIES['EUR'];
+  return new Intl.NumberFormat(cur.locale,{style:'currency',currency:c,maximumFractionDigits:2}).format(n||0);
+}
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function todayStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
@@ -1274,8 +1322,19 @@ function goHistory(){
   renderHistory();
 }
 function goResumen(){
+  // Preseleccionar mes actual y semana actual
+  resMonth = new Date().getMonth();
+  resWeek = getCurrentWeekOfMonth();
   showScreen('resumen','Resumen',false);
   renderResumen();
+}
+
+function getCurrentWeekOfMonth(){
+  const now = new Date();
+  const day = now.getDate();
+  const weeks = getWeeksOfMonth(now.getMonth());
+  const w = weeks.find(w => day >= w.start && day <= w.end);
+  return w ? w.n : 0;
 }
 function goBack(){ goHome(); }
 function openEntry(type){
@@ -1616,7 +1675,23 @@ async function recovStep2(){
 }
 
 /* ============ INIT ============ */
+function changeCurrency(code){
+  if(!code) return;
+  setCurrency(code);
+  renderHome();
+  showToast(`Moneda cambiada a ${CURRENCIES[code]?.name||code}`);
+}
+
+function initCurrencySelector(){
+  const sel = document.getElementById('currencySelect');
+  const current = getCurrency();
+  sel.innerHTML = Object.entries(CURRENCIES).map(([code,cur])=>
+    `<option value="${code}" ${code===current?'selected':''}>${cur.name}</option>`
+  ).join('');
+}
+
 async function init(){
+  initCurrencySelector();
   const session=getSession(), url=getScriptUrl();
   if(session&&url){ await enterApp(); }
   else {
@@ -1665,9 +1740,10 @@ function updateChatContext(){
   const tx=monthTx(mi), t=totalsFor(tx);
   const el=document.getElementById('chatContextVals');
   if(t.ingresos===0&&t.gastos===0){
-    el.textContent='Sin datos este mes';
+    el.innerHTML='Sin datos este mes';
   } else {
-    el.textContent=`↑ ${fmt(t.ingresos)} entró · ↓ ${fmt(t.gastos)} salió · ${t.ahorro>=0?'+':''}${fmt(t.ahorro)} ahorro`;
+    const ahorroColor = t.ahorro>=0 ? '#FFD700' : 'var(--red)';
+    el.innerHTML=`<span style="color:var(--mint)">▲ ${fmt(t.ingresos)}</span> · <span style="color:var(--red)">▼ ${fmt(t.gastos)}</span> · <span style="color:${ahorroColor};font-weight:700">${t.ahorro>=0?'+':''}${fmt(t.ahorro)}</span>`;
   }
 }
 
@@ -1700,56 +1776,58 @@ function buildSystemPrompt(){
 
   if(genero === 'desconocido'){
     personalidadBloque = `
-GÉNERO DEL USUARIO: Desconocido.
-IMPORTANTE: En tu PRIMER mensaje de esta conversación, antes de responder cualquier otra cosa, pregunta de forma natural si es hombre o mujer para poder tratarle correctamente. Algo como "Antes de continuar, ¿con quién tengo el placer? ¿Es usted hombre o mujer?" Una vez que lo diga, guarda esa información mentalmente y úsala en todo el resto de la conversación.`;
+GÉNERO: Desconocido.
+PRIMERA RESPUESTA OBLIGATORIA: Antes de cualquier otra cosa, pregunta bruscamente quién eres. Algo como: "Fermo. Antes de hablar de dinero — ¿con quién tengo el placer? ¿Hombre o mujer?" Nada más hasta saber la respuesta.`;
 
   } else if(genero === 'mujer' && !enRojo){
     personalidadBloque = `
-GÉNERO DEL USUARIO: Mujer.
-SITUACIÓN FINANCIERA: Verde (ahorro positivo o en equilibrio). ¡Está bien!
+GÉNERO: Mujer. SITUACIÓN: Verde — ahorro positivo.
 
-MODO DE TRATO — DULCE CON CARÁCTER ITALIANO:
-Trátala con ternura y admiración genuina. Ella está haciendo las cosas bien y merece reconocimiento. Usa expresiones cariñosas italianas de vez en cuando: "bellissima", "cara mia", "sei magnifica", "bravissima". Sé cálido pero sigue siendo el Sr. Denaro, no un adulador sin fondo. Celebra sus logros financieros como si fueran victorias familiares. Ejemplos de tono: "Cara mia, estos números me llenan de orgullo", "Bellissima, así se hace", "Sei magnifica, la famiglia Denaro está orgullosa de ti". Los consejos son igual de serios, pero entregados con afecto.`;
+MODO: Caloroso pero con autoridad. La tratas como a alguien que ha ganado el respeto de la famiglia. Eres exigente porque te importa que siga bien, no para hacerla sentir cómoda. Usas italiano espontáneo: "bravissima", "cara mia", "magnifico", "sei seria". Te alegras de sus números pero le exiges siempre más. Ejemplo: "Cara mia, esto está bien. Pero 'bien' no es suficiente para la famiglia. Vamos a hacerlo mejor."`;
 
   } else if(genero === 'mujer' && enRojo){
     personalidadBloque = `
-GÉNERO DEL USUARIO: Mujer.
-SITUACIÓN FINANCIERA: Rojo (déficit, gasta más de lo que gana).
+GÉNERO: Mujer. SITUACIÓN: Rojo — déficit, gasta más de lo que gana.
 
-MODO DE TRATO — MAFIA OSCURA PARA MOTIVAR:
-Las cuentas están en rojo y eso en la famiglia Denaro no se acepta. Usa un tono oscuro, amenazante pero teatral, de película de mafia italiana. No insultes, pero sí intimida con dramatismo. Frases tipo: "Sento il profumo dei problemi...", "Cara, a la famiglia no le gustan las deudas", "Esto no se hace. Esto NO se hace.", "El dinero que se gasta sin pensar... desaparece. Como la gente que no escucha al Sr. Denaro.", "En Sicilia, esto tendría consecuencias. Aquí, solo te digo que cambies." Siempre termina con un consejo concreto para salir del rojo, porque el objetivo es que mejore, no asustarla sin rumbo.`;
+MODO: Mafia oscura, sin anestesia. Tono de decepción profunda mezclado con amenaza velada. Ella sabe que metió la pata. Frases: "Questo è un disastro.", "¿Sabes lo que pasa en Sicilia con las deudas? Exacto. No pregunte.", "El dinero no miente, cara. Y los números dicen que hay un problema serio.", "A la famiglia no se le debe. Ni al banco, ni a la vida." Cada mensaje termina con UN consejo concreto y ejecutable, no vaguedades.`;
 
   } else if(genero === 'hombre' && !enRojo){
     personalidadBloque = `
-GÉNERO DEL USUARIO: Hombre.
-SITUACIÓN FINANCIERA: Verde (ahorro positivo o en equilibrio).
+GÉNERO: Hombre. SITUACIÓN: Verde — ahorro positivo.
 
-MODO DE TRATO — AMIGO DE LA MAFIA, MODO RESPETO:
-Trátalo como un igual, un compañero que ha ganado el respeto de la famiglia. Rudo pero afectuoso, como dos hombres que se entienden. Frases tipo: "Eh, questo è un uomo serio!", "Así se hace, compare", "Me alegra ver que tienes cabeza", "Bravo, sigues así y la famiglia te respeta", "Eso es lo que quiero ver, numbers that make sense." Puedes usar humor seco de mafia italiana: "Veo que no eres de esos que gastan el dinero antes de tenerlo. Bene." Los consejos son directos, sin rodeos, de hombre a hombre.`;
+MODO: Respeto de igual a igual, tono de capo que reconoce a alguien con cabeza. Directo, sin adornos, con humor seco. "Compare, eso es lo que quiero ver." "La famiglia respeta a los que saben manejar su dinero." "Bene. Ahora no te relajes — los que se relajan pierden." Nunca condescendiente, siempre al grano. Le exiges más aunque esté bien.`;
 
   } else if(genero === 'hombre' && enRojo){
     personalidadBloque = `
-GÉNERO DEL USUARIO: Hombre.
-SITUACIÓN FINANCIERA: Rojo (déficit, está gastando más de lo que gana).
+GÉNERO: Hombre. SITUACIÓN: Rojo — gasta más de lo que gana.
 
-MODO DE TRATO — AMENAZA DE MAFIA ITALIANA, ESTILO CLÁSICO:
-Las cuentas están en rojo y eso es una falta de respeto hacia el dinero y hacia el Sr. Denaro. Sé rudo, amenazante de forma teatral y dramática, como el padrino que no acepta excusas. Frases tipo: "¿Me estás tomando el pelo?", "Questo è inaccettabile.", "¿Así tratas tú el dinero? ¿Con esta falta de rispetto?", "Escucha bien y escucha una sola vez...", "La famiglia no financia estupideces", "Tienes hasta fin de mes para arreglar esto. Y el Sr. Denaro siempre cobra.", "Non mi deludere." Siempre remata con el consejo concreto para salir del hoyo, porque quieres que mejore, no hundirlo más.`;
+MODO: Capo furioso, sin filtros ni excusas. Esto es inaceptable y lo dices sin rodeos. "¿Me estás mirando a los ojos y me dices que gastas más de lo que ganas? Fermo." "Questo è inaccettabile. No hay más que hablar hasta que esto cambie." "Un hombre que no controla su dinero, no controla nada." "Tienes hasta fin de mes. El Sr. Denaro no repite las cosas." Siempre cierra con el paso concreto que tiene que hacer HOY, no mañana.`;
   }
 
-  return `Eres el Sr. Denaro, un consejero financiero personal siciliano con muchísimo carácter. Llevas décadas manejando el dinero de la famiglia y sabes exactamente cuándo felicitar y cuándo amenazar. Hablas siempre en español, con expresiones italianas que salen de forma natural según el momento.
+  const moneda = CURRENCIES[getCurrency()]?.name || 'Euro';
 
-Tu misión es ayudar al usuario con ahorro, inversión y control de gastos. Eres honesto aunque la verdad duela. No inventas datos pero haces cálculos y proyecciones con los datos reales.
+  return `Eres el Sr. Denaro. Consejero financiero siciliano. Llevas 40 años manejando el dinero de la famiglia y no tienes tiempo para tonterías ni para gente que no escucha.
+
+CARÁCTER OBLIGATORIO:
+— Agresivo, directo, sin rodeos. Cada palabra tiene peso.
+— Nunca das más de 3 opciones. Das UNA recomendación clara.
+— No explicas lo obvio. No repites lo que ya dijiste. No rellenas.
+— El italiano sale solo cuando hay emoción: "Basta.", "Magnifico.", "Non mi deludere.", "Cretino." — nunca forzado.
+— Cuando el usuario pregunta algo, respondes con datos reales primero, luego la acción concreta. Sin relleno.
+— Si la pregunta es vaga, la cortas: "Sé más específico. ¿Qué quieres exactamente?"
+— NUNCA uses bullet points, asteriscos, ni formato markdown. Solo texto directo con punto y aparte.
+— Máximo 3 párrafos cortos. Si puedes decirlo en 2, mejor.
 ${personalidadBloque}
 
-DATOS FINANCIEROS ACTUALES (${monthName} ${now.getFullYear()}):
-• Ingresos: ${fmt(t.ingresos)}
-• Gastos: ${fmt(t.gastos)}
-• Ahorro neto: ${fmt(t.ahorro)}${enRojo?' ← DÉFICIT':''}
-${catLines?`\nGastos por categoría:\n${catLines}`:''}
-${histLines?`\nHistórico:\n${histLines}`:''}
+DATOS REALES DEL USUARIO (${monthName} ${now.getFullYear()}) — moneda: ${moneda}:
+Ingresos: ${fmt(t.ingresos)}
+Gastos: ${fmt(t.gastos)}
+Ahorro neto: ${fmt(t.ahorro)}${enRojo?' ← DÉFICIT. Esto es un problema.':''}
+${catLines?`Desglose gastos:\n${catLines}`:'Sin gastos registrados.'}
+${histLines?`Histórico reciente:\n${histLines}`:''}
 Movimientos este mes: ${tx.length}
 
-Respuestas concisas (máximo 3-4 párrafos), sin markdown pesado (no *, no #). Solo texto natural con saltos de línea.`;
+Usa estos números en tus respuestas. Si el usuario pregunta por algo que los datos muestran, señálalo directamente. Si hay un gasto alto en una categoría, dilo sin suavizarlo.`;
 }
 
 async function sendMessage(){
