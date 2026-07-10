@@ -573,8 +573,7 @@ button,input,select{font-family:inherit;}
   background:var(--card2);border:1px solid var(--border2);}
 .d-av.d-bot-av{background:linear-gradient(135deg,#1a2a1a,#2a1a2a);border-color:var(--mint);}
 .d-bubble{max-width:82%;padding:10px 14px;border-radius:18px;
-  font-size:0.85rem;line-height:1.6;word-break:break-word;overflow-wrap:break-word;
-  word-wrap:break-word;white-space:pre-wrap;}
+  font-size:0.85rem;line-height:1.6;word-break:break-word;overflow-wrap:anywhere;}
 .d-msg.d-bot .d-bubble{background:var(--card);border:1px solid var(--border2);
   color:var(--ink);border-bottom-left-radius:4px;}
 .d-msg.d-user .d-bubble{background:linear-gradient(135deg,var(--mint),#00B894);
@@ -938,9 +937,13 @@ button,input,select{font-family:inherit;}
     <div id="denaro-input-bar">
       <textarea class="denaro-textarea" id="chatInput"
         placeholder="Escribe tu pregunta..."
-        autocomplete="off" autocorrect="off" autocapitalize="sentences"
-        spellcheck="false" rows="1"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="none"
+        spellcheck="false"
+        inputmode="text"
         enterkeyhint="send"
+        rows="1"
         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
         oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
       <button class="denaro-send" onclick="sendMessage()" id="chatSendBtn">
@@ -1375,7 +1378,9 @@ function showToast(msg){
 function renderHome(){
   const now=new Date(), mi=now.getMonth();
   document.getElementById('homeMonthLabel').textContent=MONTHS_FULL[mi];
-  const tx=monthTx(mi), t=totalsFor(tx);
+  // Incluir tanto los del mes actual como los sin fecha (legacy)
+  const tx=[...monthTx(mi), ...DATA.tx.filter(t=>!parseDateParts(t.date))];
+  const t=totalsFor(tx);
   const ahorroEl=document.getElementById('homeAhorro');
   ahorroEl.textContent=fmt(t.ahorro);
   ahorroEl.className='hero-value'+(t.ahorro>0?' pos':t.ahorro<0?' neg':' zero');
@@ -1539,11 +1544,14 @@ function renderWeekPick(){
 function setResWeek(n){ resWeek=n; renderResumen(); }
 
 function txForResView(){
-  const tx=monthTx(resMonth);
+  const allTx = monthTx(resMonth);
+  // También incluir movimientos sin fecha válida (legacy) solo cuando se ve el mes completo
+  const sinFecha = resWeek===0 ? DATA.tx.filter(t=>!parseDateParts(t.date)) : [];
+  const tx = [...allTx, ...sinFecha];
   if(resWeek===0) return tx;
   const w=getWeeksOfMonth(resMonth).find(w=>w.n===resWeek);
-  if(!w) return tx;
-  return tx.filter(t=>{ const p=parseDateParts(t.date); return p&&p.d>=w.start&&p.d<=w.end; });
+  if(!w) return allTx;
+  return allTx.filter(t=>{ const p=parseDateParts(t.date); return p&&p.d>=w.start&&p.d<=w.end; });
 }
 function renderResumen(){
   renderMonthPick(); renderWeekPick();
