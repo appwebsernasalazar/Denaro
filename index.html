@@ -290,6 +290,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e
 /* toast */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--card2);color:#fff;padding:10px 22px;border-radius:999px;font-weight:700;font-size:.82rem;opacity:0;transition:all .22s;pointer-events:none;z-index:90;border:1px solid var(--border2);max-width:88%;text-align:center;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── PERFIL ── */
+.prf-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+.prf-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--mint),#00B894);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto;}
+.prf-name{text-align:center;font-size:1rem;font-weight:800;margin-top:4px;}
+.prf-email{text-align:center;font-size:.72rem;color:var(--ink2);margin-top:2px;}
+.prf-field{display:flex;flex-direction:column;gap:6px;}
+.prf-field label{font-size:.66rem;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;}
+.prf-field input,.prf-field select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 13px;font-size:.86rem;color:#fff;font-family:inherit;}
+.prf-field input:focus,.prf-field select:focus{outline:none;border-color:var(--mint);}
+.prf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.prf-save{width:100%;border:none;border-radius:12px;background:linear-gradient(135deg,var(--mint),#00B894);color:#0D0D0D;padding:13px;font-weight:800;font-size:.88rem;cursor:pointer;font-family:inherit;}
+.prf-section{font-size:.68rem;font-weight:700;color:var(--mint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.prf-key-row{display:flex;gap:8px;align-items:center;}
+.prf-key-row input{flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 13px;font-size:.82rem;color:#fff;font-family:inherit;}
+.prf-key-row input:focus{outline:none;border-color:var(--mint);}
+.prf-key-btn{background:var(--mint);border:none;border-radius:10px;padding:10px 14px;color:#0D0D0D;font-weight:800;font-size:.78rem;cursor:pointer;white-space:nowrap;font-family:inherit;}
+.prf-key-status{font-size:.7rem;font-weight:600;margin-top:4px;}
+.prf-key-status.ok{color:var(--mint);}
+.prf-key-status.err{color:var(--red);}
+.prf-logout{width:100%;border:1px solid var(--border2);border-radius:12px;background:transparent;color:var(--red);padding:12px;font-weight:700;font-size:.86rem;cursor:pointer;font-family:inherit;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -415,6 +436,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e
       <div class="bn" onclick="goHist()"><span class="ni">📋</span><span class="nl">Historial</span></div>
       <div class="bn" onclick="goRes()"><span class="ni">📊</span><span class="nl">Resumen</span></div>
       <div class="bn" onclick="goCons()"><span class="ni">🎩</span><span class="nl">Consejero</span></div>
+      <div class="bn" onclick="goProfile()"><span class="ni">👤</span><span class="nl">Perfil</span></div>
     </div>
   </div>
 
@@ -458,6 +480,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e
       <div class="bn active" onclick="goHist()"><span class="ni">📋</span><span class="nl">Historial</span></div>
       <div class="bn" onclick="goRes()"><span class="ni">📊</span><span class="nl">Resumen</span></div>
       <div class="bn" onclick="goCons()"><span class="ni">🎩</span><span class="nl">Consejero</span></div>
+      <div class="bn" onclick="goProfile()"><span class="ni">👤</span><span class="nl">Perfil</span></div>
     </div>
   </div>
 
@@ -479,6 +502,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e
       <div class="bn" onclick="goHist()"><span class="ni">📋</span><span class="nl">Historial</span></div>
       <div class="bn active" onclick="goRes()"><span class="ni">📊</span><span class="nl">Resumen</span></div>
       <div class="bn" onclick="goCons()"><span class="ni">🎩</span><span class="nl">Consejero</span></div>
+      <div class="bn" onclick="goProfile()"><span class="ni">👤</span><span class="nl">Perfil</span></div>
     </div>
   </div>
 
@@ -516,6 +540,72 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e
       <div class="bn" onclick="goHist()"><span class="ni">📋</span><span class="nl">Historial</span></div>
       <div class="bn" onclick="goRes()"><span class="ni">📊</span><span class="nl">Resumen</span></div>
       <div class="bn active" onclick="goCons()"><span class="ni">🎩</span><span class="nl">Consejero</span></div>
+      <div class="bn" onclick="goProfile()"><span class="ni">👤</span><span class="nl">Perfil</span></div>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="screen" id="scProfile">
+    <div class="sp">
+      <!-- Avatar y datos de cuenta -->
+      <div class="prf-card">
+        <div class="prf-avatar" id="prfAvatar">👤</div>
+        <div class="prf-name" id="prfNameDisplay">—</div>
+        <div class="prf-email" id="prfEmailDisplay">—</div>
+      </div>
+
+      <!-- Datos personales -->
+      <div class="prf-card">
+        <div class="prf-section">Datos personales</div>
+        <div class="prf-field">
+          <label>Nombre completo</label>
+          <input type="text" id="prfName" placeholder="Tu nombre" autocomplete="name">
+        </div>
+        <div class="prf-row">
+          <div class="prf-field">
+            <label>Sexo</label>
+            <select id="prfSex">
+              <option value="">— Elige —</option>
+              <option value="hombre">Hombre</option>
+              <option value="mujer">Mujer</option>
+            </select>
+          </div>
+          <div class="prf-field">
+            <label>Edad</label>
+            <input type="number" id="prfAge" placeholder="Ej: 28" min="1" max="120" inputmode="numeric">
+          </div>
+        </div>
+        <button class="prf-save" onclick="saveProfile()">Guardar datos</button>
+      </div>
+
+      <!-- API Key de Gemini -->
+      <div class="prf-card">
+        <div class="prf-section">Configuración — Sr. Denaro</div>
+        <div class="prf-field">
+          <label>API Key de Google AI Studio</label>
+          <div class="prf-key-row">
+            <input type="text" id="prfApiKey" placeholder="Pega tu API Key (AQ... o AIza...)"
+              autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text">
+            <button class="prf-key-btn" onclick="saveProfileKey()">Guardar</button>
+          </div>
+          <div class="prf-key-status" id="prfKeyStatus"></div>
+        </div>
+        <div style="font-size:.7rem;color:var(--ink3);line-height:1.5;">
+          Obtén tu key gratuita en <span style="color:var(--mint);">aistudio.google.com</span> → Get API Key
+        </div>
+      </div>
+
+      <!-- Cerrar sesión -->
+      <button class="prf-logout" onclick="logout()">⏻ Cerrar sesión</button>
+
+      <div class="app-footer">Denaro App® desarrollado por Cristhian Andrés Serna Salazar © | 2026.<br>Todos los derechos reservados. Prohibida su reproducción total o parcial sin autorización.</div>
+    </div>
+    <div class="bnav">
+      <div class="bn" onclick="goHome()"><span class="ni">🏠</span><span class="nl">Inicio</span></div>
+      <div class="bn" onclick="goHist()"><span class="ni">📋</span><span class="nl">Historial</span></div>
+      <div class="bn" onclick="goRes()"><span class="ni">📊</span><span class="nl">Resumen</span></div>
+      <div class="bn" onclick="goCons()"><span class="ni">🎩</span><span class="nl">Consejero</span></div>
+      <div class="bn active" onclick="goProfile()"><span class="ni">👤</span><span class="nl">Perfil</span></div>
     </div>
   </div>
 </div>
@@ -1168,7 +1258,82 @@ async function sendMsg(){
   addBotMsg(reply); setBusy(false);
 }
 
-/* ── Init ── */
+/* ── PERFIL ── */
+const PRF_KEY = 'denaroProfile';
+function getProfile(){ try{ return JSON.parse(localStorage.getItem(PRF_KEY)||'{}'); }catch(e){ return {}; } }
+function saveProfileData(p){ localStorage.setItem(PRF_KEY, JSON.stringify(p)); }
+
+function goProfile(){
+  document.querySelector('.topbar').style.display='';
+  document.getElementById('syncBar').style.display='';
+  showScreen('scProfile','Mi perfil',false);
+  renderProfile();
+}
+
+function renderProfile(){
+  const s = getSession(), p = getProfile();
+  // Avatar emoji por sexo
+  const avatars = {hombre:'👨', mujer:'👩'};
+  document.getElementById('prfAvatar').textContent = avatars[p.sex||getGen()] || '👤';
+  document.getElementById('prfNameDisplay').textContent = p.name || s?.email?.split('@')[0] || '—';
+  document.getElementById('prfEmailDisplay').textContent = s?.email || '—';
+  // Rellenar campos
+  document.getElementById('prfName').value = p.name || '';
+  document.getElementById('prfSex').value = p.sex || getGen() || '';
+  document.getElementById('prfAge').value = p.age || '';
+  // API Key — mostrar solo si ya hay una guardada
+  const key = getKey();
+  if(key){
+    document.getElementById('prfApiKey').value = key.slice(0,6) + '••••••••••••' + key.slice(-4);
+    document.getElementById('prfKeyStatus').textContent = '✓ API Key configurada';
+    document.getElementById('prfKeyStatus').className = 'prf-key-status ok';
+  } else {
+    document.getElementById('prfApiKey').value = '';
+    document.getElementById('prfKeyStatus').textContent = 'Sin API Key — el consejero no funcionará';
+    document.getElementById('prfKeyStatus').className = 'prf-key-status err';
+  }
+}
+
+function saveProfile(){
+  const name = document.getElementById('prfName').value.trim();
+  const sex  = document.getElementById('prfSex').value;
+  const age  = document.getElementById('prfAge').value;
+  const p = { name, sex, age };
+  saveProfileData(p);
+  // Sincronizar género con el del consejero
+  if(sex) setGen(sex);
+  // Actualizar display
+  document.getElementById('prfNameDisplay').textContent = name || getSession()?.email?.split('@')[0] || '—';
+  const avatars = {hombre:'👨', mujer:'👩'};
+  document.getElementById('prfAvatar').textContent = avatars[sex] || '👤';
+  toast('✓ Perfil guardado');
+}
+
+function saveProfileKey(){
+  const input = document.getElementById('prfApiKey');
+  const raw = input.value.trim();
+  // Si empieza con la clave enmascarada, no sobreescribir
+  if(raw.includes('••••')) { toast('Pega una nueva key para cambiarla'); return; }
+  if(!raw){ toast('Pega tu API Key primero'); return; }
+  localStorage.setItem(APIK, raw);
+  localStorage.removeItem('denaroModel'); // forzar redetección
+  document.getElementById('prfKeyStatus').textContent = 'Verificando…';
+  document.getElementById('prfKeyStatus').className = 'prf-key-status';
+  detectModel(raw).then(model => {
+    if(model){
+      document.getElementById('prfKeyStatus').textContent = `✓ Conectado — usando ${model}`;
+      document.getElementById('prfKeyStatus').className = 'prf-key-status ok';
+      input.value = raw.slice(0,6) + '••••••••••••' + raw.slice(-4);
+      toast(`✓ API Key guardada — ${model}`);
+    } else {
+      document.getElementById('prfKeyStatus').textContent = '✗ Ningún modelo disponible para esta key';
+      document.getElementById('prfKeyStatus').className = 'prf-key-status err';
+      toast('❌ Key inválida o sin acceso a Gemini');
+    }
+  });
+}
+
+/* ── INIT ── */
 async function init(){
   // Logo
   const img=document.getElementById('authLogo');
