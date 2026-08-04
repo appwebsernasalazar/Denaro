@@ -1088,12 +1088,12 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 /* ── CONSEJERO ── */
 const MODELS=[
-  'gemini-2.5-flash-lite',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3.1-flash-lite',
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-8b',
-  'gemini-1.0-pro',
 ];
 // Detecta qué modelos tiene disponibles la key y guarda el primero que funcione
 async function detectModel(key){
@@ -1237,7 +1237,7 @@ async function sendMsg(){
       res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
         method:'POST',
         headers:{'Content-Type':'application/json','x-goog-api-key':key},
-        body:JSON.stringify({system_instruction:{parts:[{text:buildSP()}]},contents,generationConfig:{maxOutputTokens:1200,temperature:0.9}})
+        body:JSON.stringify({system_instruction:{parts:[{text:buildSP()}]},contents,generationConfig:{maxOutputTokens:1200}})
       });
       if(res.status===404){await new Promise(r=>setTimeout(r,400));continue;}
       if(res.status===429){await new Promise(r=>setTimeout(r,600));continue;}
