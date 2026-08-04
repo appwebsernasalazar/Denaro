@@ -118,6 +118,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e
 .predict.ok{border-color:rgba(0,212,170,.3);background:var(--mintd);}
 .predict.warn{border-color:rgba(255,92,92,.3);background:var(--redd);}
 .predict b{color:#fff;font-weight:700;}
+
+/* Saldo total acumulado */
+.saldo-card{background:linear-gradient(135deg,rgba(0,212,170,.15),rgba(0,184,148,.08));border:1px solid rgba(0,212,170,.3);border-radius:16px;padding:16px;}
+.saldo-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.saldo-lbl{font-size:.78rem;font-weight:800;color:var(--mint);}
+.saldo-sub{font-size:.62rem;color:var(--ink3);margin-top:2px;}
+.saldo-val{font-size:1.6rem;font-weight:900;letter-spacing:-.02em;white-space:nowrap;}
+.saldo-val.pos{color:var(--mint);}
+.saldo-val.neg{color:var(--red);}
+.saldo-bar-bg{height:5px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden;margin-bottom:10px;}
+.saldo-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--mint),#00B894);transition:width .5s ease;}
+.saldo-detail{display:flex;justify-content:space-between;font-size:.65rem;color:var(--ink3);}
+.saldo-detail strong{color:var(--ink2);font-weight:700;}
 .app-footer{text-align:center;padding:4px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 4px);font-size:.56rem;color:var(--ink3);letter-spacing:.03em;line-height:1.5;flex-shrink:0;}
 .cur-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;}
 .cur-lbl{font-size:.7rem;font-weight:700;color:var(--ink2);white-space:nowrap;}
@@ -416,6 +429,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e
           <div class="hs"><div class="hs-l">Salió</div><div class="hs-v red" id="hGas">0</div></div>
         </div>
       </div>
+
+      <!-- SALDO TOTAL ACUMULADO -->
+      <div class="saldo-card">
+        <div class="saldo-top">
+          <div>
+            <div class="saldo-lbl">💰 Saldo total disponible</div>
+            <div class="saldo-sub">Acumulado desde siempre</div>
+          </div>
+          <div class="saldo-val" id="hSaldoTotal">0</div>
+        </div>
+        <div class="saldo-bar-bg">
+          <div class="saldo-bar-fill" id="hSaldoBar" style="width:0%"></div>
+        </div>
+        <div class="saldo-detail">
+          <span>Total ingresado: <strong id="hTotalIng">0</strong></span>
+          <span>Total gastado: <strong id="hTotalGas">0</strong></span>
+        </div>
+      </div>
+
       <div class="predict" id="predict"><div style="font-size:1.5rem;flex-shrink:0;">🔮</div><div id="predictTxt">Registra movimientos para ver la predicción.</div></div>
       <div class="cur-bar">
         <span class="cur-lbl">💱 Moneda</span>
@@ -949,6 +981,25 @@ function allMonthTx(mi){
 }
 
 /* ── Home ── */
+function calcSaldoTotal(){
+  const ing=DATA.tx.filter(t=>t.type==='ingreso').reduce((a,t)=>a+Number(t.amount),0);
+  const gas=DATA.tx.filter(t=>t.type==='gasto').reduce((a,t)=>a+Number(t.amount),0);
+  return {ing, gas, saldo: ing-gas};
+}
+function renderSaldoTotal(){
+  const {ing,gas,saldo}=calcSaldoTotal();
+  const el=document.getElementById('hSaldoTotal');
+  if(!el) return;
+  el.textContent=fmt(saldo);
+  el.className='saldo-val'+(saldo>0?' pos':saldo<0?' neg':'');
+  document.getElementById('hTotalIng').textContent=fmt(ing);
+  document.getElementById('hTotalGas').textContent=fmt(gas);
+  const pct=ing>0?Math.min(100,Math.max(0,(saldo/ing)*100)):0;
+  const bar=document.getElementById('hSaldoBar');
+  bar.style.width=pct.toFixed(1)+'%';
+  bar.style.background=saldo>=0?'linear-gradient(90deg,var(--mint),#00B894)':'linear-gradient(90deg,var(--red),#E53E3E)';
+}
+
 let _hChart=null;
 function renderHome(){
   const mi=new Date().getMonth();
@@ -960,6 +1011,7 @@ function renderHome(){
   document.getElementById('hGas').textContent=fmt(t.gas);
   renderPredict(mi,t);
   renderHomeChart(mi);
+  renderSaldoTotal();
 }
 function renderPredict(mi,t){
   const box=document.getElementById('predict'), txt=document.getElementById('predictTxt');
@@ -1168,7 +1220,8 @@ function buildSP(){
   else if(g==='mujer'&&rojo) modo='MUJER + ROJO: Mafia oscura. Decepción profunda, amenaza velada. "Questo è un disastro." Termina siempre con UN consejo ejecutable.';
   else if(g==='hombre'&&!rojo) modo='HOMBRE + VERDE: Respeto de igual a igual. "Compare", "bene". Te exige más aunque esté bien.';
   else modo='HOMBRE + ROJO: Capo furioso. Sin filtros. "¿Me estás mirando a los ojos?", "Non mi deludere." Cierra con el paso concreto que tiene que hacer HOY.';
-  return `Eres el Sr. Denaro. Siciliano. 40 años en las finanzas de la famiglia. Agresivo, directo, sin rodeos. Cada palabra tiene peso.
+  const {ing:totalIng, gas:totalGas, saldo:saldoTotal}=calcSaldoTotal();
+  return `Eres el Sr. Denaro.inanzas de la famiglia. Agresivo, directo, sin rodeos. Cada palabra tiene peso.
 
 REGLAS DE RESPUESTA — OBLIGATORIAS:
 1. COMPLETA SIEMPRE las ideas. Nunca dejes una frase a medias. Si empiezas un pensamiento, termínalo.
@@ -1181,7 +1234,7 @@ REGLAS DE RESPUESTA — OBLIGATORIAS:
 
 MODO ACTUAL: ${modo}
 
-DATOS (${MONTHS_F[mi]}): Ingresos ${fmt(t.ing)}, Gastos ${fmt(t.gas)}, Ahorro ${fmt(t.aho)}${rojo?' — DÉFICIT':''}.${catLines?` Gastos por cat: ${catLines}.`:''}${hist?` Histórico: ${hist}`:''}`;
+DATOS (${MONTHS_F[mi]}): Ingresos ${fmt(t.ing)}, Gastos ${fmt(t.gas)}, Ahorro mes ${fmt(t.aho)}${rojo?' — DÉFICIT':''}. Saldo total acumulado (todos los meses): ${fmt(saldoTotal)}.${catLines?` Gastos por cat: ${catLines}.`:''}${hist?` Histórico: ${hist}`:''}`;
 }
 function renderWelcome(){
   const msgs=document.getElementById('msgs');
